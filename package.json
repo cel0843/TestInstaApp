@@ -1,7 +1,7 @@
 {
-  "name": "express-ejs-app",
+  "name": "instagram-clone",
   "version": "1.0.0",
-  "description": "Express backend with React + Tailwind SPA front-end.",
+  "description": "Instagram clone with Express backend and React + Tailwind SPA front-end.",
   "type": "module",
   "main": "src/server.js",
   "scripts": {

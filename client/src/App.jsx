@@ -10,6 +10,7 @@ import { NotificationsPage } from './components/NotificationsPage.jsx';
 import { MessengerPage } from './components/MessengerPage.jsx';
 import { CommentsModal } from './components/CommentsModal.jsx';
 import { ShareModal } from './components/ShareModal.jsx';
+import { StoryViewer } from './components/StoryViewer.jsx';
 import { stories as storiesData, posts as postsData, exploreTopics, reels as reelsData, profile as profileData } from './data/sampleData.js';
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
   const [showMessenger, setShowMessenger] = useState(false);
   const [commentModalData, setCommentModalData] = useState(null);
   const [stories, setStories] = useState(storiesData);
+  const [viewingStory, setViewingStory] = useState(null);
   const [posts, setPosts] = useState(() =>
     postsData.map((post) => ({
       ...post,
@@ -32,7 +34,26 @@ export default function App() {
 
   const handleStoryClick = (story) => {
     setStories((prev) => prev.map((item) => (item.id === story.id ? { ...item, viewed: true } : item)));
-    setShareContext({ title: `${story.name}의 스토리`, subtitle: `@${story.handle}` });
+    setViewingStory(story.id);
+  };
+
+  const handleStoryClose = () => setViewingStory(null);
+
+  const handleStoryNext = () => {
+    const currentIndex = stories.findIndex((s) => s.id === viewingStory);
+    if (currentIndex < stories.length - 1) {
+      setViewingStory(stories[currentIndex + 1].id);
+      setStories((prev) => prev.map((item, idx) => (idx === currentIndex + 1 ? { ...item, viewed: true } : item)));
+    } else {
+      setViewingStory(null);
+    }
+  };
+
+  const handleStoryPrev = () => {
+    const currentIndex = stories.findIndex((s) => s.id === viewingStory);
+    if (currentIndex > 0) {
+      setViewingStory(stories[currentIndex - 1].id);
+    }
   };
 
   const handleToggleLike = (postId) => {
@@ -58,9 +79,9 @@ export default function App() {
       prev.map((post) =>
         post.id === postId
           ? {
-              ...post,
-              comments: [...post.comments, { id: `new-${Date.now()}`, user: 'you', text }]
-            }
+            ...post,
+            comments: [...post.comments, { id: `new-${Date.now()}`, user: 'you', text }]
+          }
           : post
       )
     );
@@ -135,7 +156,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#050505] via-[#090909] to-[#121212] px-4 pb-20 pt-6 text-white">
+    <div className="min-h-screen bg-white px-0 pb-20 pt-0 text-[#262626]">
       {activeTab !== 'reels' && activeTab !== 'create' && (
         <InstagramHeader
           onLikesClick={() => setShowNotifications(true)}
@@ -151,6 +172,15 @@ export default function App() {
 
       {showNotifications && <NotificationsPage onClose={() => setShowNotifications(false)} />}
       {showMessenger && <MessengerPage onClose={() => setShowMessenger(false)} />}
+      {viewingStory && (
+        <StoryViewer
+          stories={stories}
+          initialStoryId={viewingStory}
+          onClose={handleStoryClose}
+          onNextStory={handleStoryNext}
+          onPrevStory={handleStoryPrev}
+        />
+      )}
       {commentModalData && (
         <CommentsModal
           username={commentModalData.username}
